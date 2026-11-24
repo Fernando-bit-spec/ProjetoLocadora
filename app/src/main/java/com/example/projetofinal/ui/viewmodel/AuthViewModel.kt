@@ -13,12 +13,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class AuthUiState(
+    val selectedTab: Int = 0, // 0: Login, 1: Cadastro
     val username: String = "",
     val senha: String = "",
     val isLoading: Boolean = false,
     val rememberMe: Boolean = false,
     val isLoggedIn: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+
+    // Cadastro
+    val regUsername: String = "",
+    val regEmail: String = "",
+    val regSenha: String = "",
+    val regConfirmSenha: String = ""
 )
 
 class AuthViewModel(
@@ -43,6 +50,10 @@ class AuthViewModel(
         }
     }
 
+    fun onTabSelected(index: Int) {
+        _uiState.value = _uiState.value.copy(selectedTab = index, errorMessage = null)
+    }
+
     fun onUsernameChange(newVal: String) {
         _uiState.value = _uiState.value.copy(username = newVal, errorMessage = null)
     }
@@ -53,6 +64,22 @@ class AuthViewModel(
 
     fun onRememberMeChange(newVal: Boolean) {
         _uiState.value = _uiState.value.copy(rememberMe = newVal)
+    }
+
+    fun onRegUsernameChange(newVal: String) {
+        _uiState.value = _uiState.value.copy(regUsername = newVal, errorMessage = null)
+    }
+
+    fun onRegEmailChange(newVal: String) {
+        _uiState.value = _uiState.value.copy(regEmail = newVal, errorMessage = null)
+    }
+
+    fun onRegSenhaChange(newVal: String) {
+        _uiState.value = _uiState.value.copy(regSenha = newVal, errorMessage = null)
+    }
+
+    fun onRegConfirmSenhaChange(newVal: String) {
+        _uiState.value = _uiState.value.copy(regConfirmSenha = newVal, errorMessage = null)
     }
 
     fun login() {
@@ -76,6 +103,45 @@ class AuthViewModel(
                 _snackBarMessage.emit("Bem-vindo(a), ${user.username}!")
             }.onFailure { ex ->
                 val msg = ex.message ?: "Erro ao realizar login."
+                _uiState.value = _uiState.value.copy(errorMessage = msg)
+                _snackBarMessage.emit(msg)
+            }
+        }
+    }
+
+    fun register() {
+        val current = _uiState.value
+        if (current.regUsername.isBlank()) {
+            _uiState.value = current.copy(errorMessage = "Por favor, informe o usuário.")
+            return
+        }
+        if (current.regEmail.isBlank() || !current.regEmail.contains("@")) {
+            _uiState.value = current.copy(errorMessage = "Por favor, informe um e-mail válido.")
+            return
+        }
+        if (current.regSenha.isBlank()) {
+            _uiState.value = current.copy(errorMessage = "Por favor, informe a senha.")
+            return
+        }
+        if (current.regSenha.length < 4) {
+            _uiState.value = current.copy(errorMessage = "A senha deve ter pelo menos 4 caracteres.")
+            return
+        }
+        if (current.regSenha != current.regConfirmSenha) {
+            _uiState.value = current.copy(errorMessage = "As senhas não coincidem.")
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            val result = repository.register(current.regUsername, current.regEmail, current.regSenha)
+            _uiState.value = _uiState.value.copy(isLoading = false)
+
+            result.onSuccess { user ->
+                preferencesRepository.setLoggedIn(true, user.username)
+                _snackBarMessage.emit("Cadastro realizado! Bem-vindo(a), ${user.username}!")
+            }.onFailure { ex ->
+                val msg = ex.message ?: "Erro ao realizar cadastro."
                 _uiState.value = _uiState.value.copy(errorMessage = msg)
                 _snackBarMessage.emit(msg)
             }

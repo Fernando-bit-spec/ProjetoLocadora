@@ -14,6 +14,9 @@ interface ApiService {
     @POST("login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
+    @POST("register")
+    suspend fun register(@Body request: RegisterRequest): Response<LoginResponse>
+
     // Categorias
     @GET("categorias")
     suspend fun getCategorias(): Response<List<CategoriaDto>>

@@ -7,6 +7,12 @@ data class LoginRequest(
     @SerializedName("senha") val senha: String
 )
 
+data class RegisterRequest(
+    @SerializedName("usuario") val usuario: String,
+    @SerializedName("email") val email: String,
+    @SerializedName("senha") val senha: String
+)
+
 data class LoginResponse(
     @SerializedName("sucesso") val sucesso: Boolean,
     @SerializedName("mensagem") val mensagem: String,

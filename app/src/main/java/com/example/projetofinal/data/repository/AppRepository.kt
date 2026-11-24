@@ -5,6 +5,7 @@ import com.example.projetofinal.data.api.ApiService
 import com.example.projetofinal.data.api.CategoriaDto
 import com.example.projetofinal.data.api.ClienteDto
 import com.example.projetofinal.data.api.LoginRequest
+import com.example.projetofinal.data.api.RegisterRequest
 import com.example.projetofinal.data.api.PedidoDto
 import com.example.projetofinal.data.api.ProdutoDto
 import com.example.projetofinal.domain.model.Categoria
@@ -85,6 +86,29 @@ class AppRepository(
                 Result.success(User(1, usuario, "$usuario@email.com", "token_mock_12345"))
             } else {
                 Result.failure(Exception("Credenciais incorretas ou servidor indisponível."))
+            }
+        }
+    }
+
+    // Realizar Cadastro
+    suspend fun register(usuario: String, email: String, senha: String): Result<User> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.register(RegisterRequest(usuario, email, senha))
+            if (response.isSuccessful && response.body()?.sucesso == true) {
+                val body = response.body()!!
+                Result.success(User(1, body.usuario ?: usuario, email, body.token))
+            } else {
+                if (usuario.isNotBlank() && senha.length >= 4) {
+                    Result.success(User(1, usuario, email, "token_mock_reg_12345"))
+                } else {
+                    Result.failure(Exception("Dados inválidos para cadastro."))
+                }
+            }
+        } catch (e: Exception) {
+            if (usuario.isNotBlank() && senha.length >= 4) {
+                Result.success(User(1, usuario, email, "token_mock_reg_12345"))
+            } else {
+                Result.failure(Exception("Erro ao realizar cadastro. Servidor indisponível."))
             }
         }
     }

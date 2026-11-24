@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Store
@@ -25,6 +26,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -94,81 +97,193 @@ fun LoginScreen(
                         color = MaterialTheme.colorScheme.primary
                     )
 
-                    Text(
-                        text = "Acesse sua conta para continuar",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    OutlinedTextField(
-                        value = state.username,
-                        onValueChange = { viewModel.onUsernameChange(it) },
-                        label = { Text("Usuário") },
-                        leadingIcon = {
-                            Icon(imageVector = Icons.Default.Person, contentDescription = null)
-                        },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    OutlinedTextField(
-                        value = state.senha,
-                        onValueChange = { viewModel.onSenhaChange(it) },
-                        label = { Text("Senha") },
-                        leadingIcon = {
-                            Icon(imageVector = Icons.Default.Lock, contentDescription = null)
-                        },
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = state.rememberMe,
-                            onCheckedChange = { viewModel.onRememberMeChange(it) }
+                    TabRow(selectedTabIndex = state.selectedTab) {
+                        Tab(
+                            selected = state.selectedTab == 0,
+                            onClick = { viewModel.onTabSelected(0) },
+                            text = { Text("Entrar") }
                         )
-                        Text(
-                            text = "Lembrar de mim",
-                            style = MaterialTheme.typography.bodyMedium
+                        Tab(
+                            selected = state.selectedTab == 1,
+                            onClick = { viewModel.onTabSelected(1) },
+                            text = { Text("Cadastrar") }
                         )
                     }
 
-                    if (state.errorMessage != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    if (state.selectedTab == 0) {
+                        // --- ABA DE LOGIN ---
+                        Text(
+                            text = "Acesse sua conta para continuar",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedTextField(
+                            value = state.username,
+                            onValueChange = { viewModel.onUsernameChange(it) },
+                            label = { Text("Usuário") },
+                            leadingIcon = {
+                                Icon(imageVector = Icons.Default.Person, contentDescription = null)
+                            },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = state.senha,
+                            onValueChange = { viewModel.onSenhaChange(it) },
+                            label = { Text("Senha") },
+                            leadingIcon = {
+                                Icon(imageVector = Icons.Default.Lock, contentDescription = null)
+                            },
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = state.errorMessage!!,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
 
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    Button(
-                        onClick = { viewModel.login() },
-                        enabled = !state.isLoading,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                    ) {
-                        if (state.isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = MaterialTheme.colorScheme.onPrimary
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = state.rememberMe,
+                                onCheckedChange = { viewModel.onRememberMeChange(it) }
                             )
-                        } else {
-                            Text("ENTRAR")
+                            Text(
+                                text = "Lembrar de mim",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
+                        if (state.errorMessage != null) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = state.errorMessage!!,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Button(
+                            onClick = { viewModel.login() },
+                            enabled = !state.isLoading,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                        ) {
+                            if (state.isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            } else {
+                                Text("ENTRAR")
+                            }
+                        }
+                    } else {
+                        // --- ABA DE CADASTRO ---
+                        Text(
+                            text = "Crie sua conta para começar",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedTextField(
+                            value = state.regUsername,
+                            onValueChange = { viewModel.onRegUsernameChange(it) },
+                            label = { Text("Usuário") },
+                            leadingIcon = {
+                                Icon(imageVector = Icons.Default.Person, contentDescription = null)
+                            },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = state.regEmail,
+                            onValueChange = { viewModel.onRegEmailChange(it) },
+                            label = { Text("E-mail") },
+                            leadingIcon = {
+                                Icon(imageVector = Icons.Default.Email, contentDescription = null)
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = state.regSenha,
+                            onValueChange = { viewModel.onRegSenhaChange(it) },
+                            label = { Text("Senha") },
+                            leadingIcon = {
+                                Icon(imageVector = Icons.Default.Lock, contentDescription = null)
+                            },
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = state.regConfirmSenha,
+                            onValueChange = { viewModel.onRegConfirmSenhaChange(it) },
+                            label = { Text("Confirmar Senha") },
+                            leadingIcon = {
+                                Icon(imageVector = Icons.Default.Lock, contentDescription = null)
+                            },
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        if (state.errorMessage != null) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = state.errorMessage!!,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Button(
+                            onClick = { viewModel.register() },
+                            enabled = !state.isLoading,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                        ) {
+                            if (state.isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            } else {
+                                Text("CADASTRAR")
+                            }
                         }
                     }
                 }
